@@ -162,3 +162,25 @@ class PairPancreasDataset(PairShapeDataset):
                                         return_faces, return_evecs, num_evecs)
         super(PairPancreasDataset, self).__init__(dataset, n_combination)
 
+@DATASET_REGISTRY.register()
+class SingleOAIDataset(SingleShapeDataset):
+    def __init__(self, data_root,
+                 phase, start_index, end_index,
+                 return_faces=True, return_evecs=True, num_evecs=120):
+        super(SingleOAIDataset, self).__init__(data_root, return_faces,
+                                                 return_evecs, num_evecs)
+        assert phase in ['train', 'test', 'full'], f'Invalid phase {phase}, only "train" or "test" or "full"'
+        # assert len(self) == 1000, f'OAI dataset should contain 1000 shapes, but get {len(self)}.'
+
+        if self.off_files:
+            self.off_files = self.off_files[start_index:end_index]
+        self._size = end_index - start_index
+
+@DATASET_REGISTRY.register()
+class PairOAIDataset(PairShapeDataset):
+    def __init__(self, data_root,
+                 phase,  start_index, end_index, n_combination=None,
+                 return_faces=True, return_evecs=True, num_evecs=120):
+        dataset = SingleOAIDataset(data_root, phase, start_index, end_index,
+                                        return_faces, return_evecs, num_evecs)
+        super(PairOAIDataset, self).__init__(dataset, n_combination)
